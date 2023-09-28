@@ -173,7 +173,8 @@ void CgPrjDlg::OnDestroy()
 	CDialogEx::OnDestroy();
 
 	// TODO: 여기에 메시지 처리기 코드를 추가합니다.
-	delete m_pDlgImage;
+	if (m_pDlgImage) delete m_pDlgImage;
+	if (m_pDlgImgResult) delete m_pDlgImgResult;
 }
 
 
@@ -189,21 +190,27 @@ void CgPrjDlg::OnBnClickedBtnTest()
 	int nWidth = m_pDlgImage->m_Image.GetWidth();
 	int nHeight = m_pDlgImage->m_Image.GetHeight();
 	int nPitch = m_pDlgImage->m_Image.GetPitch();
+	memset(fm, 0xff, nWidth*nHeight);
 
 	for (int k = 0; k < 100; k++) {
-		int x = rand() % 640;
-		int y = rand() % 480;
+		int x = rand() % nWidth;
+		int y = rand() % nHeight;
 		fm[y*nPitch + x] = 0;
 	}
-	int nSum = 0;
+
+	int nIndex = 0;
 	for (int j = 0; j < nHeight; j++) {
 		for (int i = 0; i < nWidth; i++) {
 			if (fm[j*nPitch + i] == 0) {
-				cout << nSum << ":" << i << "," << j << endl;
-				nSum++;
+				if (m_pDlgImgResult->m_nDataCount < 100) {
+					m_pDlgImgResult->m_ptData[nIndex].x = i;
+					m_pDlgImgResult->m_ptData[nIndex].y = j;
+					m_pDlgImgResult->m_nDataCount = ++nIndex;
+				}
 			}
 		}
 	}
-	cout << nSum << endl;
+
 	m_pDlgImage->Invalidate();
+	m_pDlgImgResult->Invalidate();
 }

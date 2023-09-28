@@ -13,6 +13,8 @@ public:
 
 	CImage m_Image;
 	CWnd* m_pParent;
+	int m_nDataCount = 0;
+	CPoint m_ptData[100];
 
 // 대화 상자 데이터입니다.
 #ifdef AFX_DESIGN_TIME
@@ -23,6 +25,9 @@ protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV 지원입니다.
 
 	DECLARE_MESSAGE_MAP()
+private:
+	void drawData(CDC* pDC);
+
 public:
 	afx_msg void OnBnClickedBtnUpParent();
 	virtual BOOL OnInitDialog();
