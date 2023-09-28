@@ -7,6 +7,8 @@
 #include "gPrjDlg.h"
 #include "afxdialogex.h"
 #include<iostream>
+#include "Process.h"
+#include <chrono>
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -33,6 +35,8 @@ public:
 // 구현입니다.
 protected:
 	DECLARE_MESSAGE_MAP()
+public:
+//	afx_msg void OnPaint();
 };
 
 CAboutDlg::CAboutDlg() : CDialogEx(IDD_ABOUTBOX)
@@ -45,6 +49,7 @@ void CAboutDlg::DoDataExchange(CDataExchange* pDX)
 }
 
 BEGIN_MESSAGE_MAP(CAboutDlg, CDialogEx)
+//	ON_WM_PAINT()
 END_MESSAGE_MAP()
 
 
@@ -65,10 +70,14 @@ void CgPrjDlg::DoDataExchange(CDataExchange* pDX)
 
 BEGIN_MESSAGE_MAP(CgPrjDlg, CDialogEx)
 	ON_WM_SYSCOMMAND()
-	ON_WM_PAINT()
+//	ON_WM_PAINT()
 	ON_WM_QUERYDRAGICON()
 	ON_WM_DESTROY()
 	ON_BN_CLICKED(IDC_BTN_TEST, &CgPrjDlg::OnBnClickedBtnTest)
+	ON_BN_CLICKED(IDC_BTN_PROCESS, &CgPrjDlg::OnBnClickedBtnProcess)
+	ON_BN_CLICKED(IDC_BTN_MAKE_PATTERN, &CgPrjDlg::OnBnClickedBtnMakePattern)
+	ON_BN_CLICKED(IDC_BTN_GET_DATA, &CgPrjDlg::OnBnClickedBtnGetData)
+	ON_BN_CLICKED(IDC_BTN_PROJECT, &CgPrjDlg::OnBnClickedBtnProject)
 END_MESSAGE_MAP()
 
 
@@ -135,30 +144,30 @@ void CgPrjDlg::OnSysCommand(UINT nID, LPARAM lParam)
 //  아래 코드가 필요합니다.  문서/뷰 모델을 사용하는 MFC 응용 프로그램의 경우에는
 //  프레임워크에서 이 작업을 자동으로 수행합니다.
 
-void CgPrjDlg::OnPaint()
-{
-	if (IsIconic())
-	{
-		CPaintDC dc(this); // 그리기를 위한 디바이스 컨텍스트입니다.
-
-		SendMessage(WM_ICONERASEBKGND, reinterpret_cast<WPARAM>(dc.GetSafeHdc()), 0);
-
-		// 클라이언트 사각형에서 아이콘을 가운데에 맞춥니다.
-		int cxIcon = GetSystemMetrics(SM_CXICON);
-		int cyIcon = GetSystemMetrics(SM_CYICON);
-		CRect rect;
-		GetClientRect(&rect);
-		int x = (rect.Width() - cxIcon + 1) / 2;
-		int y = (rect.Height() - cyIcon + 1) / 2;
-
-		// 아이콘을 그립니다.
-		dc.DrawIcon(x, y, m_hIcon);
-	}
-	else
-	{
-		CDialogEx::OnPaint();
-	}
-}
+//void CgPrjDlg::OnPaint()
+//{
+//	if (IsIconic())
+//	{
+//		CPaintDC dc(this); // 그리기를 위한 디바이스 컨텍스트입니다.
+//
+//		SendMessage(WM_ICONERASEBKGND, reinterpret_cast<WPARAM>(dc.GetSafeHdc()), 0);
+//
+//		// 클라이언트 사각형에서 아이콘을 가운데에 맞춥니다.
+//		int cxIcon = GetSystemMetrics(SM_CXICON);
+//		int cyIcon = GetSystemMetrics(SM_CYICON);
+//		CRect rect;
+//		GetClientRect(&rect);
+//		int x = (rect.Width() - cxIcon + 1) / 2;
+//		int y = (rect.Height() - cyIcon + 1) / 2;
+//
+//		// 아이콘을 그립니다.
+//		dc.DrawIcon(x, y, m_hIcon);
+//	}
+//	else
+//	{
+//		CDialogEx::OnPaint();
+//	}
+//}
 
 // 사용자가 최소화된 창을 끄는 동안에 커서가 표시되도록 시스템에서
 //  이 함수를 호출합니다.
@@ -216,3 +225,200 @@ void CgPrjDlg::OnBnClickedBtnTest()
 	m_pDlgImage->Invalidate();
 	m_pDlgImgResult->Invalidate();
 }
+
+
+void CgPrjDlg::OnBnClickedBtnProcess()
+{
+	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+	CProcess process;
+
+	// 시작시간
+	auto start = std::chrono::system_clock::now();
+	int nRet = process.getStarInfo(&m_pDlgImage->m_Image);
+	// 끝나는 시간
+	auto end = std::chrono::system_clock::now();
+	// 끝나는 시간 - 시작시간 = 소요시간
+	auto millisec = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
+	
+	cout << nRet << "\t" << millisec.count() << endl;
+}
+
+
+void CgPrjDlg::OnBnClickedBtnMakePattern()
+{
+	unsigned char* fm = (unsigned char*)m_pDlgImage->m_Image.GetBits();
+
+	int nWidth = m_pDlgImage->m_Image.GetWidth();
+	int nHeight = m_pDlgImage->m_Image.GetHeight();
+	int nPitch = m_pDlgImage->m_Image.GetPitch();
+	memset(fm, 0, nWidth*nHeight);
+
+	CRect rect(100, 100, 200, 200);
+	for (int j = rect.top; j < rect.bottom; j++) {
+		for (int i = rect.left; i < rect.right; i++) {
+			fm[j*nPitch + i] = rand()%0xff;
+		}
+	}
+	m_pDlgImage->Invalidate();
+}
+
+
+void CgPrjDlg::OnBnClickedBtnGetData()
+{
+	unsigned char* fm = (unsigned char*)m_pDlgImage->m_Image.GetBits();
+
+	int nWidth = m_pDlgImage->m_Image.GetWidth();
+	int nHeight = m_pDlgImage->m_Image.GetHeight();
+	int nPitch = m_pDlgImage->m_Image.GetPitch();
+
+	int nTh = 0x80;
+	CRect rect(0, 0, nWidth, nHeight);
+	int nSumX = 0;
+	int nSumY = 0;
+	int nCount = 0;
+	
+	for (int j = rect.top; j < rect.bottom; j++) {
+		for (int i = rect.left; i < rect.right; i++) {
+			if (fm[j*nPitch + i] > nTh) {
+				nSumX += i;
+				nSumY += j;
+				nCount++;
+			}
+		}
+	}
+	
+	double dCenterX = (double)nSumX / nCount;
+	double dCenterY = (double)nSumY / nCount;
+
+	cout << dCenterX << "\t" << dCenterY << endl;
+
+	m_pDlgImage->Invalidate();
+}
+
+void CgPrjDlg::UpdateDisplay()
+{
+	CClientDC dc(this);
+	m_pDlgImage->m_Image.Draw(dc, 0, 0);
+
+}
+
+void CgPrjDlg::OnBnClickedBtnProject()
+{
+	//srand((unsigned int)time(NULL));
+
+	int nRadius = 20;	//원의 반지름
+
+	// 이미지 크기
+	int nWidth = m_pDlgImage->m_Image.GetWidth();
+	int nHeight = m_pDlgImage->m_Image.GetHeight();
+
+	int nMaxX = nWidth - nRadius * 2;
+	int nMaxY = nHeight - nRadius * 2;
+
+	// 무작위 위치로 원을 그리기 위한 랜덤 좌표
+	int nSttX = rand()% nMaxX;
+	int nSttY = rand()% nMaxY;
+
+	int nGray = 80;
+	int nYellow = RGB(200, 200, 0);
+
+	int thickness = 2; // 큰원의 두께
+
+	int nPitch = m_pDlgImage->m_Image.GetPitch();
+
+	unsigned char* fm = (unsigned char*)m_pDlgImage->m_Image.GetBits();
+	memset(fm, 0xff, nWidth * nHeight);
+
+	drawCircle(fm, nSttX, nSttY, nRadius, nGray);
+	drawCross(fm, nSttX + nRadius, nSttY + nRadius);
+	drawHollowCircle(fm, nSttX + nRadius, nSttY + nRadius, nRadius*2, nRadius, thickness, nYellow); // 큰 원 그리기
+
+	
+	UpdateDisplay();
+	cout << nSttX << "," << nSttY << endl;
+
+}
+
+void CgPrjDlg::drawCircle(unsigned char* fm, int x, int y, int nRadius, int nGray)
+{
+	int nCenterX = x + nRadius;
+	int nCenterY = y + nRadius;
+	int nPitch = m_pDlgImage->m_Image.GetPitch();
+
+
+	for (int j = y; j < y + nRadius * 2; j++) {
+		for (int i = x; i < x + nRadius * 2; i++) {
+			if (isInCircle(i, j, nCenterX, nCenterY, nRadius))
+				fm[j*nPitch + i] = nGray;
+		}
+	}
+	cout << nCenterX << "," << nCenterY << endl;
+
+}
+
+bool CgPrjDlg::isInCircle(int i, int j, int nCenterX, int nCenterY, int nRadius)
+{
+	bool bRet = false;
+
+	double dX = i - nCenterX;
+	double dY = j - nCenterY;
+	double dDist = dX * dX + dY * dY;
+
+	if (dDist < nRadius*nRadius) {
+		bRet = true;
+	}
+
+	return bRet;
+}
+
+void CgPrjDlg::drawCross(unsigned char* fm, int centerX, int centerY)
+{
+	int width = 640;
+	int height = 480;
+	int thickness = 2;
+	unsigned char color = 0xff;
+
+	// 가로선 그리기
+	for (int y = centerY - thickness / 2; y < centerY + thickness / 2; y++){
+		for (int x = centerX - width / 2; x < centerX + width / 2; x++){
+			if (x >= 0 && x < width && y >= 0 && y < height){
+				fm[y * width + x] = color;
+			}
+		}
+	}
+
+	// 세로선 그리기
+	for (int y = centerY - height / 2; y < centerY + height / 2; y++) {
+		for (int x = centerX - thickness / 2; x < centerX + thickness / 2; x++) {
+			if (x >= 0 && x < width && y >= 0 && y < height) {
+				fm[y * width + x] = color;
+			}
+		}
+	}
+}
+
+void CgPrjDlg::drawHollowCircle(unsigned char* fm, int x, int y, int outerRadius, int innerRadius, int thickness, int nYellow)
+{
+	int nPitch = m_pDlgImage->m_Image.GetPitch();
+	int width = m_pDlgImage->m_Image.GetWidth();
+	int height = m_pDlgImage->m_Image.GetHeight();
+
+	for (int j = y - outerRadius; j <= y + outerRadius; j++) {
+		for (int i = x - outerRadius; i <= x + outerRadius; i++) {
+			if (i >= 0 && i < width && j >= 0 && j < height) {
+				double dX = i - x;
+				double dY = j - y;
+				double dDist = dX * dX + dY * dY;
+
+				if (dDist <= outerRadius * outerRadius && dDist >= innerRadius * innerRadius) {
+					// 내부 원 (innerRadius보다 작거나 같은 반경)에서 외부 원 (outerRadius보다 작거나 같은 반경)으로의 픽셀만 변경
+					if (dDist >= (outerRadius - thickness) * (outerRadius - thickness) && dDist <= outerRadius * outerRadius) {
+						fm[j * nPitch + i] = nYellow;
+					}
+				}
+			}
+		}
+	}
+}
+
+

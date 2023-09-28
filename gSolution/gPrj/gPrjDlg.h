@@ -32,13 +32,22 @@ protected:
 	// 생성된 메시지 맵 함수
 	virtual BOOL OnInitDialog();
 	afx_msg void OnSysCommand(UINT nID, LPARAM lParam);
-	afx_msg void OnPaint();
+//	afx_msg void OnPaint();
 	afx_msg HCURSOR OnQueryDragIcon();
 	DECLARE_MESSAGE_MAP()
 public:
-//	afx_msg void OnBnClickedBtnDlg();
+
 	afx_msg void OnDestroy();
 
 	void callFunc(int n);
 	afx_msg void OnBnClickedBtnTest();
+	afx_msg void OnBnClickedBtnProcess();
+	afx_msg void OnBnClickedBtnMakePattern();
+	afx_msg void OnBnClickedBtnGetData();
+	afx_msg void OnBnClickedBtnProject();
+	void drawCircle(unsigned char* fm, int i, int j, int nRadius, int nGray);
+	bool isInCircle(int i, int j, int nCenterX, int nCenterY, int nRadius);
+	void UpdateDisplay();
+	void drawCross(unsigned char* fm, int centerX, int centerY);
+	void drawHollowCircle(unsigned char* fm, int x, int y, int outerRadius, int innerRadius, int thickness, int nYellow);
 };
